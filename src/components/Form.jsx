@@ -1,13 +1,23 @@
 import { useState, useEffect } from "react";
 import Error from "./Error";
 
-const Form = ({ patients, setPatients }) => {
+const Form = ({ patients, setPatients, patient, setPatient }) => {
   const [name, setName] = useState("");
   const [owner, setOwner] = useState("");
   const [email, setEmail] = useState("");
   const [date, setDate] = useState("");
   const [symptoms, setSymptoms] = useState("");
   const [error, setError] = useState(false);
+
+  useEffect(() => {
+    if (Object.keys(patient).length > 0) {
+      setName(patient.name);
+      setOwner(patient.owner);
+      setEmail(patient.email);
+      setDate(patient.date);
+      setSymptoms(patient.symptoms);
+    }
+  }, [patient]);
 
   const generateID = () => {
     const random = Math.random().toString(36).substr(2);
@@ -23,16 +33,28 @@ const Form = ({ patients, setPatients }) => {
       return;
     }
     setError(false);
-
+    //Object patient
     const patientObject = {
       name,
       owner,
       email,
       date,
       symptoms,
-      id: generateID(),
     };
-    setPatients([...patients, patientObject]);
+
+    if (patient.id) {
+      //edit registrer
+      patientObject.id = patient.id;
+      const updatePatients = patients.map((state) =>
+        state.id === patient.id ? patientObject : state
+      );
+      setPatients(updatePatients);
+      setPatient({});
+    } else {
+      // add new register
+      patientObject.id = generateID();
+      setPatients([...patients, patientObject]);
+    }
     //reset form
     setName("");
     setOwner("");
@@ -145,7 +167,7 @@ const Form = ({ patients, setPatients }) => {
         <input
           type="submit"
           className="bg-indigo-600 w-full p-2 rounded-md text-white font-bold uppercase hover:bg-indigo-800 cursor-pointer transition-all"
-          value="Agregar Paciente"
+          value={patient.id ? "Editar Paciente" : "Agregar Paciente"}
         />
       </form>
     </section>
